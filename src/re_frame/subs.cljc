@@ -69,6 +69,9 @@
 (defn subscribe
   "Returns a Reagent/reaction which contains a computation"
   ([query-v]
+   (subscribe app-db query-v)
+   )
+  ([db query-v]
    (trace/with-trace {:operation (first-in-vector query-v)
                       :op-type   :sub/create
                       :tags      {:query-v query-v}}
@@ -84,9 +87,9 @@
          (if (nil? handler-fn)
            (do (trace/merge-trace! {:error true})
                (console :error (str "re-frame: no subscription handler registered for: \"" query-id "\". Returning a nil subscription.")))
-           (cache-and-return query-v [] (handler-fn app-db query-v)))))))
+           (cache-and-return query-v [] (handler-fn db query-v)))))))
 
-  ([v dynv]
+  ([db v dynv]
    (trace/with-trace {:operation (first-in-vector v)
                       :op-type   :sub/create
                       :tags      {:query-v v
@@ -106,7 +109,7 @@
            (do (trace/merge-trace! {:error true})
                (console :error (str "re-frame: no subscription handler registered for: \"" query-id "\". Returning a nil subscription.")))
            (let [dyn-vals (make-reaction (fn [] (mapv deref dynv)))
-                 sub      (make-reaction (fn [] (handler-fn app-db v @dyn-vals)))]
+                 sub      (make-reaction (fn [] (handler-fn db v @dyn-vals)))]
              ;; handler-fn returns a reaction which is then wrapped in the sub reaction
              ;; need to double deref it to get to the actual value.
              ;(console :log "Subscription created: " v dynv)

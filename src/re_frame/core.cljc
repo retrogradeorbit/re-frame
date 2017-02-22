@@ -150,7 +150,7 @@
 
 ;; -- Event Processing Callbacks
 
-(defn add-post-event-callback
+(defn add-post-event-callback-db
   "Registers a function `f` to be called after each event is processed
    `f` will be called with two arguments:
     - `event`: a vector. The event just processed.
@@ -165,15 +165,15 @@
   'id' is typically a keyword. Supplied at \"add time\" so it can subsequently
   be used at \"remove time\" to get rid of the right callback.
   "
-  ([f]
-   (add-post-event-callback f f))   ;; use f as its own identifier
-  ([id f]
-   (router/add-post-event-callback re-frame.router/event-queue id f)))
+  ([db f]
+   (add-post-event-callback-db db f f))   ;; use f as its own identifier
+  ([db id f]
+   (router/add-post-event-callback (re-frame.router/event-queues db) id f)))
 
 
-(defn remove-post-event-callback
-  [id]
-  (router/remove-post-event-callback re-frame.router/event-queue id))
+(defn remove-post-event-callback-db
+  [db id]
+  (router/remove-post-event-callback (re-frame.router/event-queues db) id))
 
 
 ;; --  Deprecation Messages

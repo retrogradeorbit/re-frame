@@ -278,8 +278,8 @@
       (first dynv)))
 
   (testing "happy case"
-    (is (= 1 @(subs/subscribe [:dyn-sub] [(r/atom 1)]))))
+    (is (= 1 @(subs/subscribe db/app-db [:dyn-sub] [(r/atom 1)]))))
   (testing "subscription that doesn't exist"
-    (is (nil? (subs/subscribe [:non-existent] [(r/atom 1)]))))
+    (is (nil? (subs/subscribe db/app-db [:non-existent] [(r/atom 1)]))))
   (testing "Passing a non-reactive value to a dynamic subscription"
     (is (thrown-with-msg? js/Error #"No protocol method IDeref" @(subs/subscribe [:dyn-sub] [1])))))

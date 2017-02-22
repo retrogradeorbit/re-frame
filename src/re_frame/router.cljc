@@ -219,7 +219,8 @@
 ;; When "dispatch" is called, the event is added into this event queue.  Later,
 ;;  the queue will "run" and the event will be "handled" by the registered function.
 ;;
-(def event-queue (->EventQueue :idle empty-queue {}))
+(def event-queues
+  {nil (->EventQueue :idle empty-queue {})})
 
 
 ;; ---------------------------------------------------------------------------
@@ -235,11 +236,12 @@
 
   Usage:
      (dispatch [:delete-item 42])"
-  [event]
-  (if (nil? event)
-      (throw (ex-info "re-frame: you called \"dispatch\" without an event vector." {}))
-      (push event-queue event))
-  nil)                                           ;; Ensure nil return. See https://github.com/Day8/re-frame/wiki/Beware-Returning-False
+  ([event] (dispatch nil event))
+  ([db event]
+   (if (nil? event)
+     (throw (ex-info "re-frame: you called \"dispatch\" without an event vector." {}))
+     (push (event-queues db) event))
+   nil))                                           ;; Ensure nil return. See https://github.com/Day8/re-frame/wiki/Beware-Returning-False
 
 
 (defn dispatch-sync
@@ -250,7 +252,8 @@
 
   Usage:
      (dispatch-sync [:delete-item 42])"
-  [event-v]
-  (handle event-v)
-  (-call-post-event-callbacks event-queue event-v)  ;; slightly ugly hack. Run the registered post event callbacks.
-  nil)                                              ;; Ensure nil return. See https://github.com/Day8/re-frame/wiki/Beware-Returning-False
+  ([event-v] (dispatch-sync nil event-v))
+  ([db event-v]
+   (handle event-v)
+   (-call-post-event-callbacks (event-queues db) event-v) ;; slightly ugly hack. Run the registered post event callbacks.
+   nil))                                              ;; Ensure nil return. See https://github.com/Day8/re-frame/wiki/Beware-Returning-False
